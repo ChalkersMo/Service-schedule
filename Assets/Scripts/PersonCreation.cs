@@ -1,10 +1,10 @@
 using System.IO;
 using TMPro;
 using UnityEngine;
+using Photon.Pun;
 using UnityEngine.UI;
 
-
-public class PersonCreation : MonoBehaviour
+public class PersonCreation : MonoBehaviourPunCallbacks
 {
     [SerializeField] private TMP_InputField nameInputField;
     [SerializeField] private TMP_Dropdown dropdown;
@@ -18,9 +18,14 @@ public class PersonCreation : MonoBehaviour
     public void SaveData()
     {
         //Create person object
-        PersonScriptable personData = new PersonScriptable();
+        PersonScriptable personData = (PersonScriptable)ScriptableObject.CreateInstance("PersonScriptable");
         //Set person name
-        personData.name = nameInputField.text;
+        if(nameInputField.text.Length > 1)
+        {
+            personData.name = nameInputField.text;
+            PhotonNetwork.NickName = nameInputField.text;
+        }
+        
         //Set person player/singer type
         int optionId = dropdown.value;
         personData.Type = dropdown.options[optionId].text;
@@ -31,8 +36,15 @@ public class PersonCreation : MonoBehaviour
         string json = JsonUtility.ToJson(personData);
         File.WriteAllText(Application.persistentDataPath + "/PersonData.json", json);
 
+        //Connect to master
+        PhotonNetwork.ConnectUsingSettings();
+
+    }
+
+    public override void OnConnectedToMaster()
+    {
         //Loading next scene
-        if(TryGetComponent(out GoToScene goToScene))
+        if (TryGetComponent(out GoToScene goToScene))
             goToScene.LoadScene();
     }
 
@@ -51,11 +63,13 @@ public class PersonCreation : MonoBehaviour
                     return;
                 }
 
-                Material material = GetComponent<Renderer>().material;
+              /*/  Material material = GetComponent<Renderer>().material;
                 if (!material.shader.isSupported) // happens when Standard shader is not included in the build
-                    material.shader = Shader.Find("Legacy Shaders/Diffuse");
+                    material.shader = Shader.Find("Legacy Shaders/Diffuse");/*/
 
-                material.mainTexture = texture;
+               // material.mainTexture = texture;
+
+                GetComponent<RawImage>().texture = texture;
                 texture2D = texture;
             }
         });
