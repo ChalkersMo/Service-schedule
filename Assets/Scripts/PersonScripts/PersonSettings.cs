@@ -2,8 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using Photon.Pun;
 
-public class PersonSettings : MonoBehaviour
+public class PersonSettings : MonoBehaviourPunCallbacks
 {
     public bool IsRegistered;
     public bool IsInRoom;
@@ -23,14 +24,24 @@ public class PersonSettings : MonoBehaviour
 
     public void EnterTheSystem()
     {
-        if (PlayerPrefs.GetInt("IsRegistered") != 0 && PlayerPrefs.GetInt("IsInRoom") != 0)
-            SceneManager.LoadScene(3);
+        if (PlayerPrefs.GetInt("IsRegistered") != 0)
+            PhotonNetwork.ConnectUsingSettings();
 
-        else if(PlayerPrefs.GetInt("IsRegistered") != 0 && PlayerPrefs.GetInt("IsInRoom") != 1)
-            SceneManager.LoadScene(2);  
-        
         else
             SceneManager.LoadScene(1);
+    }
+
+    public override void OnConnectedToMaster()
+    {
+        PhotonNetwork.JoinLobby();
+    }
+
+    public override void OnJoinedLobby()
+    {
+        if(PlayerPrefs.GetInt("IsInRoom") != 0)
+            SceneManager.LoadScene(3);
+        else
+            SceneManager.LoadScene(2);
     }
     public void SaveData(bool _isRegistered, bool _isInRoom)
     {
