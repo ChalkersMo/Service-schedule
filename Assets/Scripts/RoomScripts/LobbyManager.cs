@@ -23,10 +23,9 @@ public class LobbyManager : MonoBehaviourPunCallbacks
 
     private RoomItem tempRoomItem;
 
-    void Start()
+    private void Start()
     {
         lobbyUiManager = GetComponent<LobbyUiManager>();
-        PhotonNetwork.JoinLobby();
     }
 
     public void OnClickCreateRoom()
@@ -48,8 +47,16 @@ public class LobbyManager : MonoBehaviourPunCallbacks
 
     private void CreateRoom()
     {
-        PhotonNetwork.CreateRoom(createRoomInput.text);
+        PhotonNetwork.CreateRoom(createRoomInput.text, new RoomOptions());
     }
+
+    public override void OnCreatedRoom()
+    {
+        Debug.Log("Created room: " + PhotonNetwork.CurrentRoom.Name);
+        if (TryGetComponent(out GoToScene goToScene))
+            goToScene.LoadScene();
+    }
+
     public void JoinRoomByName()
     {
         foreach (RoomItem item in roomItems)
