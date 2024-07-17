@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Photon.Pun;
@@ -8,10 +6,12 @@ public class PersonSettings : MonoBehaviourPunCallbacks
 {
     public bool IsRegistered;
     public bool IsInRoom;
+    public string RoomName;
 
     private void Start()
     {
         DontDestroyOnLoad(gameObject);
+        LoadData();
     }
 
     private int BoolToInt(bool _bool)
@@ -22,13 +22,45 @@ public class PersonSettings : MonoBehaviourPunCallbacks
             return 0;
     }
 
+    private bool IntToBool(int val)
+    {
+        if (val != 0)
+            return true;
+        else
+            return false;
+    }
+
     public void EnterTheSystem()
     {
-        if (PlayerPrefs.GetInt("IsRegistered") != 0)
-            PhotonNetwork.ConnectUsingSettings();
-
+        if (!PhotonNetwork.IsConnected)
+        {
+            if (IsRegistered)
+            {
+                PhotonNetwork.ConnectUsingSettings();
+            }
+            else
+            {
+                SceneManager.LoadScene(1);
+            }
+        }
         else
-            SceneManager.LoadScene(1);
+        {
+            if (IsRegistered)
+            {
+                if (IsInRoom)
+                    PhotonNetwork.JoinRoom(RoomName);
+
+                else
+                    SceneManager.LoadScene(2);
+            }
+            else
+            {
+                PhotonNetwork.Disconnect();
+                SceneManager.LoadScene(1);
+            }
+        }
+        
+        
     }
 
     public override void OnConnectedToMaster()
@@ -38,22 +70,32 @@ public class PersonSettings : MonoBehaviourPunCallbacks
 
     public override void OnJoinedLobby()
     {
-        if(PlayerPrefs.GetInt("IsInRoom") != 0)
-            SceneManager.LoadScene(3);
+        if(IsInRoom)
+            PhotonNetwork.JoinRoom(RoomName);
+          
         else
             SceneManager.LoadScene(2);
     }
-    public void SaveData(bool _isRegistered, bool _isInRoom)
+
+    public override void OnJoinedRoom()
+    {
+        SceneManager.LoadScene(3);
+    }
+
+    public void SaveData(bool _isRegistered, bool _isInRoom, string _roomName)
     {
         IsRegistered = _isRegistered;
         IsInRoom = _isInRoom;
-       
+        RoomName = _roomName;
+
+        PlayerPrefs.SetString("RoomName", RoomName);
         PlayerPrefs.SetInt("IsRegistered", BoolToInt(IsRegistered));
         PlayerPrefs.SetInt("IsInRoom", BoolToInt(IsInRoom));
     }
     public void LoadData()
     {
-        PlayerPrefs.GetInt("IsRegistered");
-        PlayerPrefs.GetInt("IsInRoom");
+        RoomName = PlayerPrefs.GetString("RoomName");
+        IsRegistered = IntToBool(PlayerPrefs.GetInt("IsRegistered"));
+        IsInRoom = IntToBool(PlayerPrefs.GetInt("IsInRoom"));
     }
 }

@@ -2,7 +2,6 @@ using System.IO;
 using TMPro;
 using UnityEngine;
 using Photon.Pun;
-using UnityEngine.UI;
 
 public class PersonCreation : MonoBehaviourPunCallbacks
 {
@@ -11,10 +10,13 @@ public class PersonCreation : MonoBehaviourPunCallbacks
 
     private PhotoChanging photoChanging;
 
+    private PersonSettings personSettings;
+
     private void Awake()
     {
         PhotonNetwork.AutomaticallySyncScene = true;
         photoChanging = FindObjectOfType<PhotoChanging>();
+        personSettings = FindObjectOfType<PersonSettings>();
     }
 
     public void SaveData()
@@ -51,6 +53,7 @@ public class PersonCreation : MonoBehaviourPunCallbacks
     public override void OnJoinedLobby()
     {
         //Loading next scene
+        personSettings.SaveData(true, false, null);
         if (TryGetComponent(out GoToScene goToScene))
             goToScene.LoadScene();
     }
