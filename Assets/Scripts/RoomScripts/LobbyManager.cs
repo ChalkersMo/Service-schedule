@@ -8,10 +8,17 @@ public class LobbyManager : MonoBehaviourPunCallbacks
 {
     public RoomItem roomItemObj;
 
+    public List<PersonSetUp> personList = new List<PersonSetUp>();
+    public PersonSetUp personSetup;
+
     [SerializeField] private TMP_InputField createRoomInput;
     [SerializeField] private TMP_InputField joinRoomInput;
 
     [SerializeField] private GameObject contentObj;
+    [SerializeField] private Transform personContent;
+
+    [SerializeField] private GameObject lobbyObj;
+    [SerializeField] private GameObject roomObj;
 
     private TMP_InputField PasswordInputField;
 
@@ -28,6 +35,10 @@ public class LobbyManager : MonoBehaviourPunCallbacks
     {
         lobbyUiManager = GetComponent<LobbyUiManager>();
         personSettings = FindObjectOfType<PersonSettings>();
+        if (personSettings.IsInRoom)
+        {
+            PhotonNetwork.JoinRoom(personSettings.RoomName);
+        }
     }
 
     public void OnClickCreateRoom()
@@ -88,9 +99,34 @@ public class LobbyManager : MonoBehaviourPunCallbacks
 
     public override void OnJoinedRoom()
     {
-        personSettings.SaveData(true, true, PhotonNetwork.CurrentRoom.Name);
-        if (TryGetComponent(out GoToScene goToScene))
-            goToScene.LoadScene();
+        if (!personSettings.IsInRoom)
+        {
+            personSettings.SaveData(true, true, PhotonNetwork.CurrentRoom.Name);
+
+        }
+
+        lobbyObj.SetActive(false);
+        roomObj.SetActive(true);       
+
+        UpdatePlayerlist();
+    }
+
+    public override void OnPlayerEnteredRoom(Player newPlayer)
+    {
+        UpdatePlayerlist();
+    }
+
+    public override void OnPlayerLeftRoom(Player otherPlayer)
+    {
+        UpdatePlayerlist();
+    }
+
+    public override void OnLeftRoom()
+    {
+        personSettings.SaveData(true, false, null);
+
+        lobbyObj.SetActive(true);
+        roomObj.SetActive(false);
     }
 
     public override void OnRoomListUpdate(List<RoomInfo> roomList)
@@ -112,6 +148,27 @@ public class LobbyManager : MonoBehaviourPunCallbacks
             newRoom.SetRoomName(roomItem.Name);
             newRoom.SetRoomPassword(passwordInput.text);
             roomItems.Add(newRoom);
+        }
+    }
+
+    private void UpdatePlayerlist()
+    {
+        foreach(PersonSetUp person in personList)
+        {
+            Destroy(person.gameObject);
+        }
+        personList.Clear();
+
+        if (PhotonNetwork.CurrentRoom == null) 
+        {
+            return;
+        }
+
+        foreach(KeyValuePair<int, Player> person in PhotonNetwork.CurrentRoom.Players)
+        {
+            PersonSetUp personSetUp = Instantiate(personSetup, personContent);
+            personSetUp.SetPlayerInfo(person.Value);
+            personList.Add(personSetUp);
         }
     }
 }
