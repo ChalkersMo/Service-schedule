@@ -58,9 +58,10 @@ public class PersonCreation : MonoBehaviourPunCallbacks
             goToScene.LoadScene();
     }
    
-    public void LoadData()
+    public PersonSetUp LoadData()
     {
         string json = File.ReadAllText(Application.persistentDataPath + "/PersonData.json");
         PersonSetUp personData = JsonUtility.FromJson<PersonSetUp>(json);
+        return personData;
     }
 }

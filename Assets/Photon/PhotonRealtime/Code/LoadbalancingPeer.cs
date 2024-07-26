@@ -1902,7 +1902,7 @@ namespace Photon.Realtime
         public int PlayerTtl;
 
         /// <summary>Time To Live (TTL) for a room when the last player leaves. Keeps room in memory for case a player re-joins soon. In milliseconds.</summary>
-        public int EmptyRoomTtl;
+        public long EmptyRoomTtl;
 
         /// <summary>Removes a user's events and properties from the room when a user leaves.</summary>
         /// <remarks>

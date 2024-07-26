@@ -1,3 +1,4 @@
+using Photon.Pun;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -5,6 +6,9 @@ public class ExitButton : MonoBehaviour
 {
     public void ExitApplication()
     {
+        if (PhotonNetwork.CurrentRoom != null)
+            PhotonNetwork.CurrentRoom.IsOpen = true;
+
         Application.Quit();
     }
 

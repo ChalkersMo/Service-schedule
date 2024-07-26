@@ -8,8 +8,10 @@ public class LobbyManager : MonoBehaviourPunCallbacks
 {
     public RoomItem roomItemObj;
 
-    public List<PersonSetUp> personList = new List<PersonSetUp>();
-    public PersonSetUp personSetup;
+    public List<AssignPersonSetUpVisual> personList = new List<AssignPersonSetUpVisual>();
+    public AssignPersonSetUpVisual personSetup;
+
+    [SerializeField] TextMeshProUGUI roomName;
 
     [SerializeField] private TMP_InputField createRoomInput;
     [SerializeField] private TMP_InputField joinRoomInput;
@@ -30,6 +32,10 @@ public class LobbyManager : MonoBehaviourPunCallbacks
 
     private RoomItem tempRoomItem;
     private PersonSettings personSettings;
+
+
+    private float nextUpdateTime;
+    private float timeBetweenUpdates = 1.5f;
 
     private void Start()
     {
@@ -60,9 +66,13 @@ public class LobbyManager : MonoBehaviourPunCallbacks
 
     private void CreateRoom()
     {
-        PhotonNetwork.CreateRoom(createRoomInput.text, new RoomOptions());
+        PhotonNetwork.CreateRoom(createRoomInput.text, new RoomOptions {CleanupCacheOnLeave = false});
+        Debug.Log("Creating the room..");
     }
-
+    public void LeaveRoom()
+    {
+        PhotonNetwork.LeaveRoom();
+    }
     public override void OnCreatedRoom()
     {
         Debug.Log("Created room: " + PhotonNetwork.CurrentRoom.Name);
@@ -106,7 +116,9 @@ public class LobbyManager : MonoBehaviourPunCallbacks
         }
 
         lobbyObj.SetActive(false);
-        roomObj.SetActive(true);       
+        roomObj.SetActive(true);
+
+        roomName.text = PhotonNetwork.CurrentRoom.Name;
 
         UpdatePlayerlist();
     }
@@ -131,7 +143,12 @@ public class LobbyManager : MonoBehaviourPunCallbacks
 
     public override void OnRoomListUpdate(List<RoomInfo> roomList)
     {
-        UpdateRoomList(roomList);
+        if(Time.time > nextUpdateTime)
+        {
+            UpdateRoomList(roomList);
+            nextUpdateTime = Time.time + timeBetweenUpdates;
+        }
+        
     }
 
     private void UpdateRoomList(List<RoomInfo> roomList)
@@ -144,7 +161,7 @@ public class LobbyManager : MonoBehaviourPunCallbacks
 
         foreach(RoomInfo roomItem in roomList)
         {
-            RoomItem newRoom =  Instantiate(roomItemObj, contentObj.transform);
+            RoomItem newRoom = Instantiate(roomItemObj, contentObj.transform);
             newRoom.SetRoomName(roomItem.Name);
             newRoom.SetRoomPassword(passwordInput.text);
             roomItems.Add(newRoom);
@@ -153,7 +170,7 @@ public class LobbyManager : MonoBehaviourPunCallbacks
 
     private void UpdatePlayerlist()
     {
-        foreach(PersonSetUp person in personList)
+        foreach(AssignPersonSetUpVisual person in personList)
         {
             Destroy(person.gameObject);
         }
@@ -166,8 +183,8 @@ public class LobbyManager : MonoBehaviourPunCallbacks
 
         foreach(KeyValuePair<int, Player> person in PhotonNetwork.CurrentRoom.Players)
         {
-            PersonSetUp personSetUp = Instantiate(personSetup, personContent);
-            personSetUp.SetPlayerInfo(person.Value);
+            AssignPersonSetUpVisual personSetUp = Instantiate(personSetup, personContent);
+            personSetUp.Assign(person.Value);
             personList.Add(personSetUp);
         }
     }

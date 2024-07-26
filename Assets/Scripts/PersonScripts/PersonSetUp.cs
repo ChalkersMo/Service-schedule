@@ -3,17 +3,22 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class PersonSetUp : MonoBehaviour
+[System.Serializable]
+public class PersonSetUp
 {
     public string Name;
     public Texture2D Photo;
     public string Type;
 
-    public TextMeshProUGUI NameText;
-    public RawImage PhotoImage;
+    private PersonSetUp tempSetUp;
 
     public void SetPlayerInfo(Player player)
     {
-        NameText.text = player.NickName;
+        if (player.IsLocal)
+            tempSetUp = PersonDataLoad.Instance.LoadData();
+
+        Name = tempSetUp.Name;
+        Photo = tempSetUp.Photo;
+        Type = tempSetUp.Type;
     }
 }

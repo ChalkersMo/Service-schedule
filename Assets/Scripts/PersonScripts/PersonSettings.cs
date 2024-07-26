@@ -32,54 +32,28 @@ public class PersonSettings : MonoBehaviourPunCallbacks
 
     public void EnterTheSystem()
     {
-        if (!PhotonNetwork.IsConnected)
+        PhotonNetwork.Disconnect();
+        Debug.Log("Disconected");
+        if (IsRegistered)
         {
-            if (IsRegistered)
-            {
-                PhotonNetwork.ConnectUsingSettings();
-            }
-            else
-            {
-                SceneManager.LoadScene(1);
-            }
+            PhotonNetwork.ConnectUsingSettings();
+            Debug.Log("Connecting..");
         }
         else
         {
-            if (IsRegistered)
-            {
-                if (IsInRoom)
-                    PhotonNetwork.JoinRoom(RoomName);
-
-                else
-                    SceneManager.LoadScene(2);
-            }
-            else
-            {
-                PhotonNetwork.Disconnect();
-                SceneManager.LoadScene(1);
-            }
+            SceneManager.LoadScene(1);
         }
-        
-        
     }
 
     public override void OnConnectedToMaster()
     {
         PhotonNetwork.JoinLobby();
+        Debug.Log("Joining lobby..");
     }
 
     public override void OnJoinedLobby()
     {
-        if(IsInRoom)
-            PhotonNetwork.JoinRoom(RoomName);
-          
-        else
-            SceneManager.LoadScene(2);
-    }
-
-    public override void OnJoinedRoom()
-    {
-        SceneManager.LoadScene(3);
+        SceneManager.LoadScene(2);
     }
 
     public void SaveData(bool _isRegistered, bool _isInRoom, string _roomName)
