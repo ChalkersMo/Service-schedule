@@ -3,6 +3,7 @@ using Photon.Pun;
 using TMPro;
 using System.Collections.Generic;
 using Photon.Realtime;
+using Firebase.Database;
 
 public class LobbyManager : MonoBehaviourPunCallbacks
 {
@@ -32,6 +33,9 @@ public class LobbyManager : MonoBehaviourPunCallbacks
 
     private RoomItem tempRoomItem;
     private PersonSettings personSettings;
+    private RoomSaving roomSaving;
+
+    private DatabaseReference databaseReference;
 
 
     private float nextUpdateTime;
@@ -39,6 +43,7 @@ public class LobbyManager : MonoBehaviourPunCallbacks
 
     private void Start()
     {
+        databaseReference = FirebaseDatabase.DefaultInstance.RootReference;
         lobbyUiManager = GetComponent<LobbyUiManager>();
         personSettings = FindObjectOfType<PersonSettings>();
         if (personSettings.IsInRoom)
@@ -188,4 +193,43 @@ public class LobbyManager : MonoBehaviourPunCallbacks
             personList.Add(personSetUp);
         }
     }
+
+    #region saving room
+    private void SaveRoomObj()
+    {
+        RoomSaving _roomSaving = new()
+        {
+            RoomName = roomName.text,
+            Room = roomObj
+        };
+        string json = JsonUtility.ToJson(_roomSaving);
+
+        databaseReference.Child("Room").Child(_roomSaving.RoomName).SetRawJsonValueAsync(json).
+            ContinueWith(task =>
+            {
+                if (task.IsCompleted)
+                {
+                    Debug.Log("Room was loaded to firebase!");
+                }
+                else
+                    Debug.Log("Room wasn't loaded to firebase FAIL");
+
+            });
+    }
+
+    private void ReadData()
+    {
+        databaseReference.Child("Room").GetValueAsync().ContinueWith(task =>
+        {
+            if (task.IsCompleted)
+            {
+                Debug.Log("Room was readed");
+                DataSnapshot dataSnapshot = task.Result;
+                roomSaving = (RoomSaving)dataSnapshot.Value;
+                roomName.text = roomSaving.RoomName;
+                roomObj = roomSaving.Room;
+            }
+        });
+    }
+    #endregion
 }
