@@ -15,7 +15,6 @@ public class AssignPersonSetUpVisual : MonoBehaviour
         NameText = GetComponentInChildren<TextMeshProUGUI>();
         PhotoImage = GetComponentInChildren<RawImage>();
 
-        personSetUp.SetPlayerInfo(player);
         NameText.text = personSetUp.Name;
         PhotoImage.texture = personSetUp.Photo;
     }

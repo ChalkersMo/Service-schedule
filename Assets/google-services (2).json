@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "636209481374",
+    "firebase_url": "https://servise-shedule-data-default-rtdb.europe-west1.firebasedatabase.app",
     "project_id": "servise-shedule-data",
     "storage_bucket": "servise-shedule-data.appspot.com"
   },

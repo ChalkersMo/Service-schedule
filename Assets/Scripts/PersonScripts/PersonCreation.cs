@@ -22,7 +22,7 @@ public class PersonCreation : MonoBehaviourPunCallbacks
     public void SaveData()
     {
         //Create person object
-        PersonSetUp personData = new PersonSetUp();
+        PersonSetUp personData = new();
         //Set person name
         if(nameInputField.text.Length > 1)
         {
@@ -58,10 +58,10 @@ public class PersonCreation : MonoBehaviourPunCallbacks
             goToScene.LoadScene();
     }
    
-    public PersonSetUp LoadData()
+ /*/public PersonSetUp LoadData()
     {
         string json = File.ReadAllText(Application.persistentDataPath + "/PersonData.json");
         PersonSetUp personData = JsonUtility.FromJson<PersonSetUp>(json);
         return personData;
-    }
+    }/*/
 }

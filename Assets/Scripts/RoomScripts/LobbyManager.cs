@@ -4,6 +4,10 @@ using TMPro;
 using System.Collections.Generic;
 using Photon.Realtime;
 using Firebase.Database;
+using System.Net.WebSockets;
+using System.Collections;
+using UnityEditor;
+using System.IO;
 
 public class LobbyManager : MonoBehaviourPunCallbacks
 {
@@ -23,6 +27,8 @@ public class LobbyManager : MonoBehaviourPunCallbacks
     [SerializeField] private GameObject lobbyObj;
     [SerializeField] private GameObject roomObj;
 
+    private RoomSavingData roomSaving;
+
     private TMP_InputField PasswordInputField;
 
     private List<RoomItem> roomItems = new List<RoomItem>();
@@ -33,7 +39,7 @@ public class LobbyManager : MonoBehaviourPunCallbacks
 
     private RoomItem tempRoomItem;
     private PersonSettings personSettings;
-    private RoomSaving roomSaving;
+    private RoomController roomController;
 
     private DatabaseReference databaseReference;
 
@@ -43,15 +49,14 @@ public class LobbyManager : MonoBehaviourPunCallbacks
 
     private void Start()
     {
-        databaseReference = FirebaseDatabase.DefaultInstance.RootReference;
+        databaseReference = FirebaseDatabase.GetInstance("https://servise-shedule-data-default-rtdb.europe-west1.firebasedatabase.app").RootReference;
         lobbyUiManager = GetComponent<LobbyUiManager>();
         personSettings = FindObjectOfType<PersonSettings>();
         if (personSettings.IsInRoom)
         {
-            PhotonNetwork.JoinRoom(personSettings.RoomName);
+            ReadRoomData();
         }
     }
-
     public void OnClickCreateRoom()
     {
         if (createRoomInput.text.Length >= 1)
@@ -71,11 +76,12 @@ public class LobbyManager : MonoBehaviourPunCallbacks
 
     private void CreateRoom()
     {
-        PhotonNetwork.CreateRoom(createRoomInput.text, new RoomOptions {CleanupCacheOnLeave = false});
+        PhotonNetwork.CreateRoom(createRoomInput.text, new RoomOptions {CleanupCacheOnLeave = false});   
         Debug.Log("Creating the room..");
     }
     public void LeaveRoom()
     {
+        SaveRoomObj();
         PhotonNetwork.LeaveRoom();
     }
     public override void OnCreatedRoom()
@@ -104,7 +110,7 @@ public class LobbyManager : MonoBehaviourPunCallbacks
     {
         if(tempRoomItem.password == PasswordInputField.text)
         {
-            PhotonNetwork.JoinRoom(tempRoomItem.roomName.text);
+            PhotonNetwork.JoinOrCreateRoom(tempRoomItem.roomName.text);
         }
         else
         {
@@ -112,18 +118,34 @@ public class LobbyManager : MonoBehaviourPunCallbacks
         }
     }
 
+    public override void OnJoinRoomFailed(short returnCode, string message)
+    {
+        if(personSettings.IsInRoom)
+            PhotonNetwork.CreateRoom(personSettings.RoomName);
+    }
+
     public override void OnJoinedRoom()
     {
         if (!personSettings.IsInRoom)
         {
             personSettings.SaveData(true, true, PhotonNetwork.CurrentRoom.Name);
-
         }
 
         lobbyObj.SetActive(false);
-        roomObj.SetActive(true);
+   
+        GameObject tempRoom = Instantiate(roomObj);
+        roomName = tempRoom.GetComponent<RoomObjsFind>().NameText.GetComponent<TextMeshProUGUI>();
+        personContent = tempRoom.GetComponent<RoomObjsFind>().PersonContent.transform;
+        roomObj = tempRoom;
 
         roomName.text = PhotonNetwork.CurrentRoom.Name;
+        roomSaving.RoomName = roomName.text;
+
+        if(roomObj.TryGetComponent(out RoomSavingData _roomSaving))
+            roomSaving = _roomSaving;
+        else
+            roomSaving = roomObj.AddComponent<RoomSavingData>();
+
 
         UpdatePlayerlist();
     }
@@ -133,27 +155,13 @@ public class LobbyManager : MonoBehaviourPunCallbacks
         UpdatePlayerlist();
     }
 
-    public override void OnPlayerLeftRoom(Player otherPlayer)
-    {
-        UpdatePlayerlist();
-    }
-
-    public override void OnLeftRoom()
-    {
-        personSettings.SaveData(true, false, null);
-
-        lobbyObj.SetActive(true);
-        roomObj.SetActive(false);
-    }
-
     public override void OnRoomListUpdate(List<RoomInfo> roomList)
     {
         if(Time.time > nextUpdateTime)
         {
             UpdateRoomList(roomList);
             nextUpdateTime = Time.time + timeBetweenUpdates;
-        }
-        
+        }       
     }
 
     private void UpdateRoomList(List<RoomInfo> roomList)
@@ -196,15 +204,10 @@ public class LobbyManager : MonoBehaviourPunCallbacks
 
     #region saving room
     private void SaveRoomObj()
-    {
-        RoomSaving _roomSaving = new()
-        {
-            RoomName = roomName.text,
-            Room = roomObj
-        };
-        string json = JsonUtility.ToJson(_roomSaving);
+    {    
+        string json = JsonUtility.ToJson(roomSaving);
 
-        databaseReference.Child("Room").Child(_roomSaving.RoomName).SetRawJsonValueAsync(json).
+        databaseReference.Child("Room").Child(personSettings.RoomName).SetRawJsonValueAsync(json).
             ContinueWith(task =>
             {
                 if (task.IsCompleted)
@@ -213,23 +216,36 @@ public class LobbyManager : MonoBehaviourPunCallbacks
                 }
                 else
                     Debug.Log("Room wasn't loaded to firebase FAIL");
-
             });
     }
 
-    private void ReadData()
+    private void ReadRoomData()
     {
-        databaseReference.Child("Room").GetValueAsync().ContinueWith(task =>
+        StartCoroutine(LoadDataEnum());
+    }
+
+    private IEnumerator LoadDataEnum()
+    {
+        var serverData = databaseReference.Child("Room").Child(personSettings.RoomName).GetValueAsync();
+        yield return new WaitUntil(predicate: () => serverData.IsCompleted);
+
+        DataSnapshot dataSnapshot = serverData.Result;
+        string jsonData = dataSnapshot.GetRawJsonValue();
+
+        if (jsonData != null)
         {
-            if (task.IsCompleted)
-            {
-                Debug.Log("Room was readed");
-                DataSnapshot dataSnapshot = task.Result;
-                roomSaving = (RoomSaving)dataSnapshot.Value;
-                roomName.text = roomSaving.RoomName;
-                roomObj = roomSaving.Room;
-            }
-        });
+            roomSaving = JsonUtility.FromJson<RoomSavingData>(jsonData);
+        }
+        else
+            print("No data found");
+
+        PhotonNetwork.JoinOrCreateRoom(personSettings.RoomName);
     }
     #endregion
+
+    private void OnApplicationQuit()
+    {
+        if(personSettings.IsInRoom)
+            SaveRoomObj();
+    }
 }

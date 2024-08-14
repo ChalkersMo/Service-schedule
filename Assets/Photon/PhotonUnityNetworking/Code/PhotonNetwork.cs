@@ -1898,7 +1898,7 @@ namespace Photon.Pun
         /// <param name="roomName">Unique name of the room to join.</param>
         /// <param name="expectedUsers">Optional list of users (by UserId) who are expected to join this game and who you want to block a slot for.</param>
         /// <returns>If the operation got queued and will be sent.</returns>
-        public static bool JoinRoom(string roomName, string[] expectedUsers = null)
+        public static bool JoinOrCreateRoom(string roomName, string[] expectedUsers = null)
         {
             if (OfflineMode)
             {

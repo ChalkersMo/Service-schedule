@@ -606,6 +606,9 @@ GameObject:
   - component: {fileID: 7195303697575128667}
   - component: {fileID: 537155839466899033}
   - component: {fileID: 7910838425537183158}
+  - component: {fileID: 7435969641974058566}
+  - component: {fileID: 8865035659121946452}
+  - component: {fileID: 4436817963111951552}
   m_Layer: 5
   m_Name: RoomCanvas
   m_TagString: Untagged
@@ -696,6 +699,59 @@ MonoBehaviour:
   m_BlockingMask:
     serializedVersion: 2
     m_Bits: 4294967295
+--- !u!114 &7435969641974058566
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3052420373600757186}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7fc14bee972fd8e498db275796047320, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  NameText: {fileID: 4188330724408978519}
+  PersonContent: {fileID: 8821896536909588904}
+--- !u!114 &8865035659121946452
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3052420373600757186}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2f44bf1af8236344e85b85bcdd477720, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  personPanel: {fileID: 616567693003018815}
+  instrumentPanel: {fileID: 2828364824942880888}
+  instrumentContent: {fileID: 7082626373819826664}
+  instrumentPrefab: {fileID: 3713474429023344616, guid: 119816dc0f6bd3b448b4561baf394e30, type: 3}
+  personPrefab: {fileID: 2405116809903975054, guid: d4e45cd86fadb8e4b8121bc8c9426983, type: 3}
+  instruments:
+  - {fileID: 11400000, guid: 3e3a20013f5fa2149a46cae56f8ae1b0, type: 2}
+  - {fileID: 11400000, guid: ae2eca6dc2795bb45bd044419b60600f, type: 2}
+  - {fileID: 11400000, guid: 173b8f0b1cc65764ab0692b5e69d2b8f, type: 2}
+  - {fileID: 11400000, guid: 47c0100c4ae0d484ab05cad570c491d0, type: 2}
+  - {fileID: 11400000, guid: 5a44af679d3d7a14fa87e569c0e4cd29, type: 2}
+  - {fileID: 11400000, guid: f336d2740ce7eb546af7dbe984f644aa, type: 2}
+  - {fileID: 11400000, guid: 1b70113c6fe794c4bb2321f95ec5baff, type: 2}
+  - {fileID: 11400000, guid: 9f25b867fc9138f47b43bfc09710a3c4, type: 2}
+  - {fileID: 11400000, guid: 6219dcd555ccfc7488b2859aa93aed8e, type: 2}
+--- !u!114 &4436817963111951552
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3052420373600757186}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c35864f5a2c5f7e4894180dbfb21f09c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &3076130995241334005
 GameObject:
   m_ObjectHideFlags: 0
@@ -942,13 +998,13 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: LobbyManager, Assembly-CSharp
-        m_MethodName: LeaveRoom
-        m_Mode: 1
+      - m_Target: {fileID: 4436817963111951552}
+        m_TargetAssemblyTypeName: ExitButton, Assembly-CSharp
+        m_MethodName: ExitFromPanel
+        m_Mode: 2
         m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_ObjectArgument: {fileID: 3052420373600757186}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.GameObject, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
           m_StringArgument: 
@@ -1423,7 +1479,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 2399258718948209510}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 4436817963111951552}
+        m_TargetAssemblyTypeName: ExitButton, Assembly-CSharp
+        m_MethodName: ExitFromPanel
+        m_Mode: 2
+        m_Arguments:
+          m_ObjectArgument: {fileID: 616567693003018815}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.GameObject, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &5092613411147283296
 GameObject:
   m_ObjectHideFlags: 0
@@ -2040,7 +2108,6 @@ GameObject:
   - component: {fileID: 597294371643103064}
   - component: {fileID: 5365161659266189663}
   - component: {fileID: 4010915208774515163}
-  - component: {fileID: 6826957401201758892}
   m_Layer: 5
   m_Name: LeaveButton
   m_TagString: Untagged
@@ -2149,7 +2216,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 6826957401201758892}
+      - m_Target: {fileID: 4436817963111951552}
         m_TargetAssemblyTypeName: ExitButton, Assembly-CSharp
         m_MethodName: ExitFromPanel
         m_Mode: 2
@@ -2161,18 +2228,6 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
---- !u!114 &6826957401201758892
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7729619603908943904}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c35864f5a2c5f7e4894180dbfb21f09c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &8022352965765812786
 GameObject:
   m_ObjectHideFlags: 0
@@ -2183,7 +2238,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1892047769066485894}
   - component: {fileID: 2497723822177792176}
-  - component: {fileID: 1605728089343768057}
   m_Layer: 5
   m_Name: BackGround
   m_TagString: Untagged
@@ -2223,19 +2277,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8022352965765812786}
   m_CullTransparentMesh: 1
---- !u!114 &1605728089343768057
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8022352965765812786}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 33dcad308cb274948a55d29c5f278672, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  PersonContent: {fileID: 8821896536909588904}
 --- !u!1 &8275005548780127042
 GameObject:
   m_ObjectHideFlags: 0
@@ -2271,7 +2312,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0.00003683567}
+  m_AnchoredPosition: {x: 0, y: 0.000005722046}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &2811388896782479359
